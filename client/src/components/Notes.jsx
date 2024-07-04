@@ -1,8 +1,9 @@
 import React, { createRef, useEffect, useRef, useState } from "react";
 import Note from "./Note";
+import useLocalStorage from "../hooks/useLocalStorage";
 
-function Notes({ }) {
-	const [notes, setNotes]=useState(JSON.parse(localStorage.getItem("notes")))
+function Notes({}) {
+	const [notes, setNotes] = useLocalStorage("notes", []);
 	// State to manage input value for new notes
 	const [input, setInput] = useState("");
 
@@ -126,10 +127,9 @@ function Notes({ }) {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		const newId = Date.now();
-		const newNote = { id: newId, text: input };
+		const newNote = { id: newId, text: input, position: determinePos() };
 		const updatedNotes = [...notes, newNote];
 		setNotes(updatedNotes);
-		localStorage.setItem("notes", JSON.stringify(updatedNotes));
 		setInput(""); // Clear the input field after adding the note
 	};
 
