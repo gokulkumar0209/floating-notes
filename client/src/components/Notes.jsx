@@ -142,7 +142,7 @@ function Notes({}) {
 						type="textbox"
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						className="bg-amber-100 border border-yellow-400"
+						className="bg-amber-100 border border-yellow-600"
 					/>
 					<button type="submit">Add</button>
 				</form>
