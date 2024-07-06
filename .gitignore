@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 node_modules/.bin/loose-envify.cmd
 node_modules/.bin/loose-envify
+=======
+node_modules/.bin/loose-envify
+node_modules/.bin/loose-envify.cmd
+>>>>>>> 1c4f61bef00bd61fbc88cf39867415f2d368bdd4
 node_modules/.bin/loose-envify.ps1
 node_modules/@remix-run/router/CHANGELOG.md
 node_modules/@remix-run/router/history.ts
