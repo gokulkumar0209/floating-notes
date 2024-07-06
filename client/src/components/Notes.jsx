@@ -27,6 +27,7 @@ function Notes({}) {
 		// Check if the ref for the note is available
 		if (noteRefs.current[id] && noteRefs.current[id].current) {
 			const noteRef = noteRefs.current[id].current;
+			console.log(noteRef);
 			const rect = noteRef.getBoundingClientRect();
 
 			// Calculate the offset from the mouse position to the note's position
@@ -132,6 +133,12 @@ function Notes({}) {
 		setNotes(updatedNotes);
 		setInput(""); // Clear the input field after adding the note
 	};
+	const handleDelete = (id) => {
+		
+		const updatedNotes = notes.filter((note) => note.id !== id);
+		setNotes(updatedNotes);
+		localStorage.setItem("notes", JSON.stringify(updatedNotes));
+	};
 
 	return (
 		<div>
@@ -160,6 +167,7 @@ function Notes({}) {
 						content={note.text}
 						pos={note.position}
 						onMouseDown={(e) => handleDragStart(note, e)}
+						onDelete={() => handleDelete(note.id)}
 					/>
 				);
 			})}
