@@ -1,4 +1,10 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
+import React, {
+	createRef,
+	useEffect,
+	useRef,
+	useState,
+	useCallback,
+} from "react";
 import Note from "./Note";
 import useLocalStorage from "../hooks/useLocalStorage";
 
@@ -21,92 +27,101 @@ function Notes({}) {
 	}
 
 	// Handle the drag start event for a note
-	const handleDragStart = (note, e) => {
-		const { id } = note;
+	const handleDragStart = useCallback(
+		(note, e) => {
+			const { id } = note;
 
-		// Check if the ref for the note is available
-		if (noteRefs.current[id] && noteRefs.current[id].current) {
-			const noteRef = noteRefs.current[id].current;
-			console.log(noteRef);
-			const rect = noteRef.getBoundingClientRect();
+			// Check if the ref for the note is available
+			if (noteRefs.current[id] && noteRefs.current[id].current) {
+				const noteRef = noteRefs.current[id].current;
+				// console.log(noteRef);
+				const rect = noteRef.getBoundingClientRect();
 
-			// Calculate the offset from the mouse position to the note's position
-			const offsetX = e.clientX - rect.left;
-			const offsetY = e.clientY - rect.top;
-			const startPos = note.position;
+				// Calculate the offset from the mouse position to the note's position
+				const offsetX = e.clientX - rect.left;
+				const offsetY = e.clientY - rect.top;
+				const startPos = note.position;
 
-			// Function to handle the note's movement as the mouse moves
-			const handleMouseMove = (e) => {
-				const newX = e.clientX - offsetX;
-				const newY = e.clientY - offsetY;
-				noteRef.style.left = `${newX}px`;
-				noteRef.style.top = `${newY}px`;
-			};
+				// Function to handle the note's movement as the mouse moves
+				const handleMouseMove = (e) => {
+					const newX = e.clientX - offsetX;
+					const newY = e.clientY - offsetY;
+					noteRef.style.left = `${newX}px`;
+					noteRef.style.top = `${newY}px`;
+				};
 
-			// Function to handle the mouse release, finalizing the note's new position
-			const handleMouseUp = () => {
-				document.removeEventListener("mousemove", handleMouseMove);
-				document.removeEventListener("mouseup", handleMouseUp);
-				const finalRect = noteRef.getBoundingClientRect();
-				const newPosition = { x: finalRect.left, y: finalRect.top };
+				// Function to handle the mouse release, finalizing the note's new position
+				const handleMouseUp = () => {
+					document.removeEventListener("mousemove", handleMouseMove);
+					document.removeEventListener("mouseup", handleMouseUp);
+					const finalRect = noteRef.getBoundingClientRect();
+					const newPosition = { x: finalRect.left, y: finalRect.top };
 
-				// Check for overlap with other notes
-				if (checkOverlap(id)) {
-					noteRef.style.left = `${startPos.x}px`;
-					noteRef.style.top = `${startPos.y}px`;
-				} else {
-					updateNotePosition(id, newPosition);
-				}
-			};
+					// Check for overlap with other notes
+					if (checkOverlap(id)) {
+						noteRef.style.left = `${startPos.x}px`;
+						noteRef.style.top = `${startPos.y}px`;
+					} else {
+						updateNotePosition(id, newPosition);
+					}
+				};
 
-			document.addEventListener("mousemove", handleMouseMove);
-			document.addEventListener("mouseup", handleMouseUp);
-		} else {
-			console.error(`Current for id ${id} is not found`);
+				document.addEventListener("mousemove", handleMouseMove);
+				document.addEventListener("mouseup", handleMouseUp);
+			} else {
+				console.error(`Current for id ${id} is not found`);
+			}
 		}
-	};
+		// [notes, noteRefs, updateNotePosition, checkOverlap]
+	);
 
 	// Function to update the note's position in the state and localStorage
-	const updateNotePosition = (id, newPosition) => {
-		const updatedNotes = notes.map((note) =>
-			note.id === id ? { ...note, position: newPosition } : note
-		);
-		setNotes(updatedNotes);
-		localStorage.setItem("notes", JSON.stringify(updatedNotes));
-	};
+	const updateNotePosition = useCallback(
+		(id, newPosition) => {
+			const updatedNotes = notes.map((note) =>
+				note.id === id ? { ...note, position: newPosition } : note
+			);
+			setNotes(updatedNotes);
+			localStorage.setItem("notes", JSON.stringify(updatedNotes));
+		},
+		[notes, setNotes]
+	);
 
 	// Function to check if the current note overlaps with any other notes
-	const checkOverlap = (id) => {
-		const currentNoteRef = noteRefs.current[id].current;
-		const rect = currentNoteRef.getBoundingClientRect();
-		return notes.some((note) => {
-			if (note.id === id) return false;
-			const otherNoteRef = noteRefs.current[note.id].current;
-			const otherRect = otherNoteRef.getBoundingClientRect();
-			const topLeft =
-				rect.left >= otherRect.left &&
-				rect.left <= otherRect.right &&
-				rect.top >= otherRect.top &&
-				rect.top <= otherRect.bottom;
-			const topRight =
-				rect.right >= otherRect.left &&
-				rect.right <= otherRect.right &&
-				rect.top >= otherRect.top &&
-				rect.top <= otherRect.bottom;
-			const bottomLeft =
-				rect.left >= otherRect.left &&
-				rect.left <= otherRect.right &&
-				rect.bottom >= otherRect.top &&
-				rect.bottom <= otherRect.bottom;
-			const bottomRight =
-				rect.right >= otherRect.left &&
-				rect.right <= otherRect.right &&
-				rect.bottom >= otherRect.top &&
-				rect.bottom <= otherRect.bottom;
-			console.log(topLeft, topRight, bottomLeft, bottomRight);
-			return topLeft || topRight || bottomLeft || bottomRight;
-		});
-	};
+	const checkOverlap = useCallback(
+		(id) => {
+			const currentNoteRef = noteRefs.current[id].current;
+			const rect = currentNoteRef.getBoundingClientRect();
+			return notes.some((note) => {
+				if (note.id === id) return false;
+				const otherNoteRef = noteRefs.current[note.id].current;
+				const otherRect = otherNoteRef.getBoundingClientRect();
+				const topLeft =
+					rect.left >= otherRect.left &&
+					rect.left <= otherRect.right &&
+					rect.top >= otherRect.top &&
+					rect.top <= otherRect.bottom;
+				const topRight =
+					rect.right >= otherRect.left &&
+					rect.right <= otherRect.right &&
+					rect.top >= otherRect.top &&
+					rect.top <= otherRect.bottom;
+				const bottomLeft =
+					rect.left >= otherRect.left &&
+					rect.left <= otherRect.right &&
+					rect.bottom >= otherRect.top &&
+					rect.bottom <= otherRect.bottom;
+				const bottomRight =
+					rect.right >= otherRect.left &&
+					rect.right <= otherRect.right &&
+					rect.bottom >= otherRect.top &&
+					rect.bottom <= otherRect.bottom;
+				// console.log(topLeft, topRight, bottomLeft, bottomRight);
+				return topLeft || topRight || bottomLeft || bottomRight;
+			});
+		},
+		[notes, noteRefs]
+	);
 
 	// useEffect to load notes from localStorage and set their positions
 	useEffect(() => {
@@ -122,23 +137,28 @@ function Notes({}) {
 		});
 		setNotes(updatedNotes);
 		localStorage.setItem("notes", JSON.stringify(updatedNotes));
-	}, []);
+	}, [notes, setNotes]);
 
 	// Handle the form submission to add a new note
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		const newId = Date.now();
-		const newNote = { id: newId, text: input, position: determinePos() };
-		const updatedNotes = [...notes, newNote];
-		setNotes(updatedNotes);
-		setInput(""); // Clear the input field after adding the note
-	};
-	const handleDelete = (id) => {
-		
-		const updatedNotes = notes.filter((note) => note.id !== id);
-		setNotes(updatedNotes);
-		localStorage.setItem("notes", JSON.stringify(updatedNotes));
-	};
+	const handleSubmit = useCallback(
+		(e) => {
+			e.preventDefault();
+			const newId = Date.now();
+			const newNote = { id: newId, text: input, position: determinePos() };
+			const updatedNotes = [...notes, newNote];
+			setNotes(updatedNotes);
+			setInput(""); // Clear the input field after adding the note
+		},
+		[input, notes, setNotes]
+	);
+	const handleDelete = useCallback(
+		(id) => {
+			const updatedNotes = notes.filter((note) => note.id !== id);
+			setNotes(updatedNotes);
+			localStorage.setItem("notes", JSON.stringify(updatedNotes));
+		}
+		// [note, setNotes]
+	);
 
 	return (
 		<div>

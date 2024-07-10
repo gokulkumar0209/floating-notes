@@ -1,7 +1,7 @@
 import React from "react";
 import { forwardRef } from "react";
 
-const Note = forwardRef(({ content, pos,onDelete, ...props }, ref) => {
+const Note = forwardRef(({ content, pos, onDelete, ...props }, ref) => {
 	// console.log(ref);
 	// console.log(message,positionX,positionY)
 	// console.log(props);
@@ -14,7 +14,7 @@ const Note = forwardRef(({ content, pos,onDelete, ...props }, ref) => {
 		>
 			<h1 className="p-4">
 				📌{content}
-				<button onClick={onDelete}>🗑️</button>
+				<button onClick={onDelete}>❌</button>
 			</h1>
 		</div>
 	);
